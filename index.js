@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         ithelp image drag and upload
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/dragonH/ithelp-drag-and-upload-image
 // @version      0.1
 // @description  ithelp image drag and upload
 // @author       dragonH
