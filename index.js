@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         ithelp image drag and upload
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  ithelp image drag and upload
 // @author       dragonH
-// @match        https://ithelp.ithome.com.tw/
+// @match        https://ithelp.ithome.com.tw/*
 // @grant        none
 // ==/UserScript==
 
@@ -17,10 +17,11 @@
   const onDrop = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    uploadImage(e.originalEvent.dataTransfer.files);
+    console.log(e);
+    uploadImage(e.originalEvent.dataTransfer.files, e.currentTarget);
     return false;
   }
-  const uploadImage = (file) => {
+  const uploadImage = (file, editor) => {
     const [image] = file;
     if (!image) {
       return false;
@@ -34,14 +35,14 @@
       processData: false,
       contentType: false,
       type: 'POST',
-      success: uploadSucceed,
+      success: (res) => {
+          uploadSucceed(res, editor);
+      }
     })
   }
-  const uploadSucceed = (res) => {
+  const uploadSucceed = (res, editor) => {
     const resultMarkDown = `![${res.url}](${res.url})`;
-    const editor = $('.CodeMirror').length
-      ? $('.CodeMirror')[0].CodeMirror
-      : undefined;
+    editor = editor.CodeMirror;
     if (!editor) {
       return false;
     }
@@ -50,8 +51,6 @@
     doc.replaceRange(`${ch ? '\n' : ''}${resultMarkDown}`, editor.getCursor());
     // editor.CodeMirror.replaceRange('replace', editor.CodeMirror.getCursor(), { line: editor.CodeMirror.getCursor().line, ch: editor.CodeMirror.getCursor().ch + 7 })
   }
-  $('.CodeMirror').on('dragenter', myPrventDefault);
-  $('.CodeMirror').on('dragover', myPrventDefault);
-  $('.CodeMirror').on('dragleave', myPrventDefault);
-  $('.CodeMirror').on('drop', onDrop);
+  $(document).on('dragenter dragover dragleave', '.CodeMirror', myPrventDefault);
+  $(document).on('drop', '.CodeMirror', onDrop);
 })();
