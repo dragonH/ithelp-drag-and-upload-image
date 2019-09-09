@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ithelp image drag and upload
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.1
 // @description  ithelp image drag and upload
 // @author       dragonH
 // @match        https://ithelp.ithome.com.tw/*
@@ -17,13 +17,16 @@
   const onDrop = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    console.log(e);
     uploadImage(e.originalEvent.dataTransfer.files, e.currentTarget);
     return false;
   }
   const uploadImage = (file, editor) => {
     const [image] = file;
     if (!image) {
+      return false;
+    }
+    if (['image/jpg', 'image/jpeg', 'image/png'].indexOf(image.type) < 0) {
+      alert('圖片必須是 jpg/jpeg/png');
       return false;
     }
     const url = '/api/upload';
@@ -36,7 +39,12 @@
       contentType: false,
       type: 'POST',
       success: (res) => {
-          uploadSucceed(res, editor);
+        if (res.status === 'failed') {
+          alert(res.errorMsg);
+          return false;
+        }
+        uploadSucceed(res, editor);
+        alert(`上傳成功!\n圖片網址:\n${res.url}`)
       }
     })
   }
